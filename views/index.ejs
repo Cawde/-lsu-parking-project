@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <%- include('partials/header') %>
+  <style>
+    :root {
+      --lsu-purple: #461D7C;
+      --lsu-gold: #FDD023;
+    }
+
+    body {
+      background: url('https://storage.googleapis.com/lsusports-com/2021/06/b16aea10-lsu-parking.jpg') no-repeat center center fixed;
+      background-size: cover;
+      min-height: 100vh;
+    }
+
+    .navbar {
+      background-color: var(--lsu-purple) !important;
+    }
+
+    .navbar-brand, .nav-link {
+      color: var(--lsu-gold) !important;
+    }
+
+    .navbar-brand:hover, .nav-link:hover {
+      color: white !important;
+    }
+
+    .content-wrapper {
+      background-color: rgba(255, 255, 255, 0.95);
+      border-radius: 10px;
+      padding: 2rem;
+      margin-top: 2rem;
+      margin-bottom: 80px;
+      min-height: calc(100vh - 160px);
+    }
+
+    .footer {
+      background-color: rgba(255, 255, 255, 0.9) !important;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      padding: 1rem 0;
+      text-align: center;
+    }
+
+    .btn-primary {
+      background-color: var(--lsu-purple);
+      border-color: var(--lsu-purple);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--lsu-gold);
+      border-color: var(--lsu-gold);
+      color: var(--lsu-purple);
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/navbar') %>
+  <div class="container mt-4">
+    <div class="content-wrapper">
+      <h1>LSU Parking Management</h1>
+      <div class="row mt-4">
+        <div class="col-md-6">
+          <div class="card fade-in">
+            <div class="card-body">
+              <h5 class="card-title">Check Availability</h5>
+              <p class="card-text">View real-time parking lot availability across campus.</p>
+              <a href="/availability" class="btn btn-primary pulse">View Lots</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card fade-in">
+            <div class="card-body">
+              <h5 class="card-title">Admin Panel</h5>
+              <p class="card-text">Manage parking lot data and update availability.</p>
+              <a href="/admin" class="btn btn-secondary pulse">Access Admin</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <%- include('partials/footer') %>
+</body>
+</html>

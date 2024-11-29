@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<%- include('partials/header') %>
+<body>
+  <%- include('partials/navbar') %>
+  <div class="container mt-4">
+    <h2>Parking Lot Availability</h2>
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <input type="text" id="searchName" class="form-control" placeholder="Search by lot name">
+      </div>
+      <div class="col-md-6">
+        <input type="number" id="minAvailability" class="form-control" placeholder="Minimum availability %">
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Lot Name</th>
+            <th>Availability</th>
+            <th>Last Updated</th>
+            <th>Day of Week</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% lots.forEach(lot => { %>
+            <tr class="slide-in">
+              <td><%= lot.name %></td>
+              <td><%= lot.availability %>%</td>
+              <td><%= lot.lastUpdated.toLocaleString() %></td>
+              <td><%= lot.dayOfWeek %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <script>
+    searchName.addEventListener('input', () => {
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      rows.forEach(row => {
+        const name = row.cells[0].textContent.toLowerCase();
+        const availability = parseInt(row.cells[1].textContent);
+        const show = name.toLowerCase().includes(searchName.value.toLowerCase()) && 
+                    (parseInt(minAvailability.value) || 0) <= availability;
+        row.style.display = show ? '' : 'none';
+      });
+    });
+
+    minAvailability.addEventListener('input', () => {
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      rows.forEach(row => {
+        const name = row.cells[0].textContent.toLowerCase();
+        const availability = parseInt(row.cells[1].textContent);
+        const show = name.toLowerCase().includes(searchName.value.toLowerCase()) && 
+                    (parseInt(minAvailability.value) || 0) <= availability;
+        row.style.display = show ? '' : 'none';
+      });
+    });
+  </script>
+  <%- include('partials/footer') %>
+</body>
+</html>

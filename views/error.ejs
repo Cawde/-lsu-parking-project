@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<%- include('partials/header') %>
+<body>
+  <%- include('partials/navbar') %>
+  <div class="container mt-4">
+    <div class="alert alert-danger">
+      <h4>Error</h4>
+      <p><%= message %></p>
+      <a href="/" class="btn btn-primary">Return Home</a>
+    </div>
+  </div>
+  <%- include('partials/footer') %>
+</body>
+</html>

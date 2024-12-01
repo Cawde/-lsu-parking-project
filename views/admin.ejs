@@ -5,7 +5,8 @@
   <%- include('partials/navbar') %>
   <div class="container mt-4">
     <h2>Admin Dashboard</h2>
-    <form id="addLotForm" class="mb-4 fade-in">
+    <!-- Update form to include action and method -->
+    <form id="addLotForm" action="/admin/add" method="POST" class="mb-4 fade-in">
       <div class="row">
         <div class="col-md-4">
           <input type="text" name="name" class="form-control" placeholder="Lot Name" required>
@@ -34,7 +35,10 @@
                 <td><%= lot.name %></td>
                 <td><%= lot.availability %>%</td>
                 <td>
-                  <button class="btn btn-danger btn-sm delete-lot">Delete</button>
+                  <!-- Replace button with form for delete -->
+                  <form action="/admin/delete/<%= lot._id %>" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                  </form>
                 </td>
               </tr>
             <% }); %>

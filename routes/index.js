@@ -1,22 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const ParkingLot = require('../models/parkingLot');
 const parkingController = require('../controllers/parkingController');
 
-router.get('/', async (req, res) => {
+router.get('/', (req, res) => {
     res.render('index');
 });
 
-router.get('/availability', async (req, res) => {
-    const lots = await ParkingLot.find({});
-    res.render('availability', { lots });
-});
+router.get('/availability', parkingController.getAllLots);
 
-router.get('/admin', async (req, res) => {
-    const lots = await ParkingLot.find({});
-    res.render('admin', { lots });
-});
+router.get('/admin', parkingController.getAdminPage);
 
-router.get('/sync', parkingController.syncParkingData);
+// Admin actions
+router.post('/admin/add', parkingController.addLot);
+router.post('/admin/delete/:id', parkingController.deleteLot);
 
 module.exports = router;

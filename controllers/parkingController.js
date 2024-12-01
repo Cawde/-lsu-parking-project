@@ -33,10 +33,20 @@ async function scrapeParkingData() {
 }
 
 exports.syncParkingData = async (req, res) => {
-    const lots = await scrapeParkingData();
-    await ParkingLot.deleteMany({}); // Clear existing data
-    await ParkingLot.insertMany(lots);
-    res.redirect('/availability');
+    try {
+        const lots = await scrapeParkingData();
+        try {
+            await ParkingLot.deleteMany({});
+            await ParkingLot.insertMany(lots);
+            res.redirect('/availability');
+        } catch (dbError) {
+            console.error('Database operation failed:', dbError);
+            res.render('error', { message: 'Failed to update parking data' });
+        }
+    } catch (error) {
+        console.error('Scraping error:', error);
+        res.render('error', { message: 'Failed to fetch parking data' });
+    }
 };
 
 exports.getAllLots = async (req, res) => {

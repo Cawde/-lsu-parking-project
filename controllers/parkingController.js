@@ -3,18 +3,21 @@ const cheerio = require('cheerio');
 const ParkingLot = require('../models/parkingLot');
 
 // Scraping function
-exports.scrapeParkingData = async function() {
+exports.scrapeParkingData = async function () {
     try {
         console.log('Starting to scrape data...');
         const response = await axios.get('https://www.lsu.edu/parking/availability.php');
+
+        // Load the HTML using Cheerio
         const $ = cheerio.load(response.data);
         const lots = [];
 
+        // Select table rows and iterate through them
         $('table tbody tr').each((i, element) => {
             const columns = $(element).find('td');
             const name = $(columns[0]).text().trim();
-            const availability = parseInt($(columns[1]).text().replace('%', ''));
-            
+            const availability = parseInt($(columns[1]).text().replace('%', ''), 10);
+
             console.log('Found lot:', { name, availability });
 
             if (name && !isNaN(availability)) {
@@ -26,12 +29,12 @@ exports.scrapeParkingData = async function() {
                 });
             }
         });
-        
+
         console.log(`Scraped ${lots.length} lots`);
-        
+
         // Save to database
         if (lots.length > 0) {
-            await ParkingLot.deleteMany({});  // Clear existing data
+            await ParkingLot.deleteMany({}); // Clear existing data
             const savedLots = await ParkingLot.insertMany(lots);
             console.log(`Saved ${savedLots.length} lots to database`);
         }
@@ -42,6 +45,8 @@ exports.scrapeParkingData = async function() {
         return [];
     }
 };
+
+
 
 // Get all lots for availability page
 exports.getAllLots = async (req, res) => {

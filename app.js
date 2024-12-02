@@ -1,3 +1,4 @@
+global.ReadableStream = require('web-streams-polyfill').ReadableStream;
 const express = require('express');
 const mongoose = require('mongoose');
 const routes = require('./routes');

@@ -18,18 +18,25 @@
         <thead>
           <tr>
             <th>Lot Name</th>
-            <th>Availability</th>
-            <th>Last Updated</th>
-            <th>Day of Week</th>
+            <th>Lot #</th>
+            <th>Total Spaces</th>
+            <th>7:00 am</th>
+            <th>11:00 am</th>
+            <th>2:00 pm</th>
+            <th>4:00 pm</th>
           </tr>
         </thead>
         <tbody>
           <% lots.forEach(lot => { %>
-            <tr class="slide-in">
+            <tr class="slide-in" data-day="<%= lot.dayOfWeek %>">
               <td><%= lot.name %></td>
-              <td><%= lot.availability %>%</td>
-              <td><%= lot.lastUpdated.toLocaleString() %></td>
+              <td><%= lot.lotNumber %></td>
+              <td><%= lot.totalSpaces %></td>
               <td><%= lot.dayOfWeek %></td>
+              <td><%= lot.timeSlots?.sevenAM || 0 %>% Full</td>
+              <td><%= lot.timeSlots?.elevenAM || 0 %>% Full</td>
+              <td><%= lot.timeSlots?.twoPM || 0 %>% Full</td>
+              <td><%= lot.timeSlots?.fourPM || 0 %>% Full</td>
             </tr>
           <% }); %>
         </tbody>
@@ -40,22 +47,47 @@
     const searchInput = document.getElementById('searchName');
     const availabilityInput = document.getElementById('minAvailability');
     const tbody = document.querySelector('tbody');
+    const dayButtons = document.querySelectorAll('[data-day]');
+    let selectedDay = '';
+
+    dayButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        dayButtons.forEach(b => b.classList.remove('active'));
+        if (selectedDay === button.dataset.day) {
+          selectedDay = '';
+          button.classList.remove('active');
+        } else {
+          selectedDay = button.dataset.day;
+          button.classList.add('active');
+        }
+        filterTable();
+      });
+    });
     
     function filterTable() {
-        const rows = Array.from(tbody.querySelectorAll('tr'));
-        const searchTerm = searchInput.value.toLowerCase();
-        const minAvail = parseInt(availabilityInput.value) || 0;
+      const rows = Array.from(tbody.querySelectorAll('tr'));
+      const searchTerm = searchInput.value.toLowerCase();
+      const minAvail = parseInt(availabilityInput.value) || 0;
+      
+      rows.forEach(row => {
+        const name = row.cells[0].textContent.toLowerCase();
+        const sevenAM = parseInt(row.cells[3].textContent) || 0;
+        const elevenAM = parseInt(row.cells[4].textContent) || 0;
+        const twoPM = parseInt(row.cells[5].textContent) || 0;
+        const fourPM = parseInt(row.cells[6].textContent) || 0;
         
-        rows.forEach(row => {
-            const name = row.cells[0].textContent.toLowerCase();
-            const availability = parseInt(row.cells[1].textContent.replace('%', ''));
-            const show = name.includes(searchTerm) && availability >= minAvail;
-            row.style.display = show ? '' : 'none';
-        });
+        const dayMatch = !selectedDay || row.dataset.day === selectedDay;
+        const searchMatch = name.includes(searchTerm);
+        const availMatch = sevenAM >= minAvail || elevenAM >= minAvail || 
+                         twoPM >= minAvail || fourPM >= minAvail;
+        
+        row.style.display = (dayMatch && searchMatch && availMatch) ? '' : 'none';
+      });
     }
+
     searchInput.addEventListener('input', filterTable);
     availabilityInput.addEventListener('input', filterTable);
-</script>
+  </script>
   <%- include('partials/footer') %>
 </body>
 </html>

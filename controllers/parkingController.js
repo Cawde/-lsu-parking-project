@@ -2,53 +2,60 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const ParkingLot = require('../models/parkingLot');
 
-// Scraping function
-exports.scrapeParkingData = async function () {
+exports.scrapeParkingData = async function() {
     try {
-        console.log('Starting to scrape data...');
-        const response = await axios.get('https://www.lsu.edu/parking/availability.php');
-
-        // Load the HTML using Cheerio
-        const $ = cheerio.load(response.data);
         const lots = [];
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
-        // Select table rows and iterate through them
-        $('table tbody tr').each((i, element) => {
-            const columns = $(element).find('td');
-            const name = $(columns[0]).text().trim();
-            const availability = parseInt($(columns[1]).text().replace('%', ''), 10);
+        for (const day of days) {
+            const response = await axios.get('https://www.lsu.edu/parking/availability.php', {
+                params: { day: day.toLowerCase() },
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'text/html'
+                }
+            });
+            
+            const $ = cheerio.load(response.data);
+            
+            $('table tbody tr').each((i, row) => {
+                const columns = $(row).find('td');
+                if (columns.length < 7) return;
 
-            console.log('Found lot:', { name, availability });
-
-            if (name && !isNaN(availability)) {
-                lots.push({
-                    name: name,
-                    availability: availability,
+                const lot = {
+                    name: $(columns[0]).text().trim(),
+                    lotNumber: $(columns[1]).text().trim(),
+                    totalSpaces: parseInt($(columns[2]).text().trim()) || 0,
+                    timeSlots: {
+                        sevenAM: parseInt($(columns[3]).text().replace(/\D/g, '')) || 0,
+                        elevenAM: parseInt($(columns[4]).text().replace(/\D/g, '')) || 0,
+                        twoPM: parseInt($(columns[5]).text().replace(/\D/g, '')) || 0,
+                        fourPM: parseInt($(columns[6]).text().replace(/\D/g, '')) || 0
+                    },
                     lastUpdated: new Date(),
-                    dayOfWeek: new Date().toLocaleDateString('en-US', { weekday: 'long' })
-                });
-            }
-        });
+                    dayOfWeek: day
+                };
 
-        console.log(`Scraped ${lots.length} lots`);
+                if (lot.name) {
+                    lots.push(lot);
+                }
+            });
 
-        // Save to database
+            // Add some delay between requests
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+
         if (lots.length > 0) {
-            await ParkingLot.deleteMany({}); // Clear existing data
-            const savedLots = await ParkingLot.insertMany(lots);
-            console.log(`Saved ${savedLots.length} lots to database`);
+            await ParkingLot.deleteMany({});
+            await ParkingLot.insertMany(lots);
         }
 
         return lots;
     } catch (error) {
-        console.error('Scraping/saving error:', error);
+        console.error('Scraping error:', error);
         return [];
     }
 };
-
-
-
-// Get all lots for availability page
 exports.getAllLots = async (req, res) => {
     try {
         const lots = await ParkingLot.find({});
@@ -59,7 +66,6 @@ exports.getAllLots = async (req, res) => {
     }
 };
 
-// Get admin page
 exports.getAdminPage = async (req, res) => {
     try {
         const lots = await ParkingLot.find({});
@@ -70,12 +76,18 @@ exports.getAdminPage = async (req, res) => {
     }
 };
 
-// Add new lot
 exports.addLot = async (req, res) => {
     try {
         const lot = new ParkingLot({
             name: req.body.name,
-            availability: req.body.availability,
+            lotNumber: req.body.lotNumber,
+            totalSpaces: req.body.totalSpaces,
+            timeSlots: {
+                sevenAM: req.body.timeSlots.sevenAM,
+                elevenAM: req.body.timeSlots.elevenAM,
+                twoPM: req.body.timeSlots.twoPM,
+                fourPM: req.body.timeSlots.fourPM
+            },
             lastUpdated: new Date(),
             dayOfWeek: new Date().toLocaleDateString('en-US', { weekday: 'long' })
         });
@@ -87,7 +99,6 @@ exports.addLot = async (req, res) => {
     }
 };
 
-// Delete lot
 exports.deleteLot = async (req, res) => {
     try {
         await ParkingLot.findByIdAndDelete(req.params.id);

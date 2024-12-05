@@ -5,16 +5,41 @@
   <%- include('partials/navbar') %>
   <div class="container mt-4">
     <h2>Admin Dashboard</h2>
+  
+    <div class="row mb-4">
+      <div class="col-md-12">
+        <input type="text" id="searchAdmin" class="form-control" placeholder="Search by lot name...">
+      </div>
+    </div>
     <form id="addLotForm" action="/admin/add" method="POST" class="mb-4 fade-in">
-      <div class="row">
-        <div class="col-md-4">
+      <div class="row g-3">
+        <div class="col-md-3">
           <input type="text" name="name" class="form-control" placeholder="Lot Name" required>
         </div>
-        <div class="col-md-4">
-          <input type="number" name="availability" class="form-control" placeholder="Availability %" required min="0" max="100">
+        <div class="col-md-2">
+          <input type="text" name="lotNumber" class="form-control" placeholder="Lot #" required>
+        </div>
+        <div class="col-md-2">
+          <input type="number" name="totalSpaces" class="form-control" placeholder="Total Spaces" required>
         </div>
         <div class="col-md-4">
-          <button type="submit" class="btn btn-primary pulse">Add Lot</button>
+          <div class="row g-2">
+            <div class="col-md-3">
+              <input type="number" name="timeSlots[sevenAM]" class="form-control" placeholder="7am %" required min="0" max="100">
+            </div>
+            <div class="col-md-3">
+              <input type="number" name="timeSlots[elevenAM]" class="form-control" placeholder="11am %" required min="0" max="100">
+            </div>
+            <div class="col-md-3">
+              <input type="number" name="timeSlots[twoPM]" class="form-control" placeholder="2pm %" required min="0" max="100">
+            </div>
+            <div class="col-md-3">
+              <input type="number" name="timeSlots[fourPM]" class="form-control" placeholder="4pm %" required min="0" max="100">
+            </div>
+          </div>
+        </div>
+        <div class="col-md-1">
+          <button type="submit" class="btn btn-primary pulse">Add</button>
         </div>
       </div>
     </form>
@@ -23,7 +48,12 @@
         <thead>
           <tr>
             <th>Lot Name</th>
-            <th>Availability</th>
+            <th>Lot #</th>
+            <th>Total Spaces</th>
+            <th>7:00 am</th>
+            <th>11:00 am</th>
+            <th>2:00 pm</th>
+            <th>4:00 pm</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -32,7 +62,12 @@
             <% lots.forEach((lot, index) => { %>
               <tr class="slide-in delay-<%= index %>">
                 <td><%= lot.name %></td>
-                <td><%= lot.availability %>%</td>
+                <td><%= lot.lotNumber %></td>
+                <td><%= lot.totalSpaces %></td>
+                <td><%= lot.timeSlots?.sevenAM || 0 %>% Full</td>
+                <td><%= lot.timeSlots?.elevenAM || 0 %>% Full</td>
+                <td><%= lot.timeSlots?.twoPM || 0 %>% Full</td>
+                <td><%= lot.timeSlots?.fourPM || 0 %>% Full</td>
                 <td>
                   <form action="/admin/delete/<%= lot._id %>" method="POST" style="display: inline;">
                     <button type="submit" class="btn btn-danger btn-sm">Delete</button>
@@ -46,5 +81,21 @@
     </div>
   </div>
   <%- include('partials/footer') %>
+  <script>
+    const adminSearchInput = document.getElementById('searchAdmin');
+    const adminTableBody = document.querySelector('tbody');
+    
+    function filterAdminTable() {
+        const searchTerm = adminSearchInput.value.toLowerCase();
+        const rows = Array.from(adminTableBody.querySelectorAll('tr'));
+        
+        rows.forEach(row => {
+            const name = row.cells[0].textContent.toLowerCase();
+            row.style.display = name.includes(searchTerm) ? '' : 'none';
+        });
+    }
+    
+    adminSearchInput.addEventListener('input', filterAdminTable);
+    </script>
 </body>
 </html>

@@ -10,7 +10,6 @@ router.get('/availability', parkingController.getAllLots);
 
 router.get('/admin', parkingController.getAdminPage);
 
-// Admin actions
 router.post('/admin/add', parkingController.addLot);
 router.post('/admin/delete/:id', parkingController.deleteLot);
 
